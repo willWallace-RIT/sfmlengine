@@ -22,15 +22,13 @@ Game::Game(){
   b.accel.y=0.0f;
 }
 void Game::update(std::chrono::time_point<std::chrono::system_clock> current){
-  std::chrono::duration<float> elapsed = current-prevTime;
+  std::chrono::duration<float,std::milli> elapsed = (current-prevTime);
   t += elapsed.count()*MILLI_TO_SEC;
   printT += elapsed.count()*MILLI_TO_SEC;
-  //std::cout<<"elapsed:"<<elapsed.count()*MILLI_TO_SEC<<std::endl; 
-   
   if(t>=FPS){
-    t=0;
-    follow_target(elapsed.count()*MILLI_TO_SEC,&a,&b);
+    follow_target(t,&a,&b);
   
+    t-=FPS;
     vec2_t dist = a.position.addX(b.position.muxX(-1.0f));
     //std::cout<<"dist"<<dist.sqrMag()<<std::endl;
     if(dist.sqrMag()<1.0f){
@@ -40,13 +38,13 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current){
 
   }
   if(printT >=PRINT_FPS){
-    printT=0;
+    printT-=PRINT_FPS;
     print();
   
     //char a;
     //cin>>a;
   }
-  current = prevTime;
+  prevTime= current;
 }
 Game::Game(const Game& other){
   prevTime = other.prevTime;
