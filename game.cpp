@@ -31,7 +31,7 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current){
     t-=FPS;
     vec2_t dist = a.position.addX(b.position.muxX(-1.0f));
     //std::cout<<"dist"<<dist.sqrMag()<<std::endl;
-    if(dist.sqrMag()<1.0f){
+    if(dist.sqrMag()<25.0f){
       a.position.x = randFloat().randRange(-25.0,25.0);
       a.position.y = randFloat().randRange(-25.0,25.0);
     }
