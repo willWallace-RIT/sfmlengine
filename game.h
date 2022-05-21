@@ -16,9 +16,11 @@ class Game{
   game_object_t a;
   game_object_t b;
   float maxVel=100;
+  const float DIST_UNIT = 0.5f;
+  const float RADIUS = 1.0f;
   float maxAccel=10;
-  const float FPS = 1.0/1000.0;
-  const float PRINT_FPS = 1.0f;
+  const float FPS = 1.0f/60.0f;
+  const float PRINT_FPS = 0.5f;
   const float MILLI_TO_SEC = 1.0f/1000.0f;
 };
 

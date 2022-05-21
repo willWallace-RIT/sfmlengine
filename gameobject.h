@@ -1,5 +1,10 @@
 #pragma once
+#include<cstdint>
+#include<bit>
+#include<limits>
+#include<math.h>
 struct vec2_t{
+
   float x,y;
   void add(vec2_t other){
    x+=other.x;
@@ -29,26 +34,32 @@ struct vec2_t{
   }
   vec2_t norm(){
     vec2_t normV = {}; 
-    normV.x = fastInv(sqrMag())*x;
-    normV.y = fastInv(sqrMag())*y;
+     
+  
+    normV.x = (abs(x)>0.000000000000001f)?(1.0f/sqrt(sqrMag()))*x:0.0f;
+    
+    normV.y = (abs(y)>0.000000000000001f)?(1.0f/sqrt(sqrMag()))*y:0.0f; 
     return normV;
   }
   float sqrMag(){
     return (x*x)+(y*y);
   }
-
+  float mag(){
+    return sqrt(sqrMag());
+  }
   //fast inverse squareroot from quake III
   float fastInv(float number){
-    long i;
-    float x2,y;
-    const float threehalfs = 1.5f;
-    x2 = number*0.5f;
-    y=number;
-    i = *(long *)&y;
-    i = 0x5f3759df - (i>>1);
-    y = *(float *)&i;
-    y = y * (threehalfs - (x2 * y * y));
-    return y;
+      double y = static_cast<double>(number);
+      uint64_t x2 = y * 0.5;
+
+      std::int64_t i = *(std::int64_t *) &y;
+    i = 0x5fe6eb50c7b537a9 - (i >> 1);
+    y= *(double *) &i;
+    y *= y*(1.5 -  (x2*y*y));
+
+    return static_cast<float>(y);
+    
+    
   }
 };
 
