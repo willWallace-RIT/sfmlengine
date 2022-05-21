@@ -6,8 +6,8 @@ struct vec2_t{
    y+=other.y;
   }
   
-  vec2_t addX(vec2_t other){
-    vec2_t sum = {}
+  vec2_t addX(vec2_t other) const{
+    vec2_t sum = {};
     sum.x=x+other.x;
     sum.y=y+other.y;
     return sum;
@@ -21,18 +21,23 @@ struct vec2_t{
     y*=scalar;
     
   }
-  vec2_t muxX(float scalar){
+  vec2_t muxX(float scalar) const{
     vec2_t prod = {};
     prod.x=x*scalar;
     prod.y=y*scalar;
     return prod;
   }
   vec2_t norm(){
-    vec2_t normV = {}
-    
-    normV.x = (1.0/sqrMag())*x;
-    normV.y = (1.0/sqrMag())*y;
-    return norm;
+    vec2_t normV = {};
+    if(sqrMag()>0.0f){ 
+      normV.x = (1.0f/sqrMag())*x;
+      normV.y = (1.0f/sqrMag())*y;
+    }
+    else{
+      normV.x = 0.0f;
+      normV.y = 0.0f;
+    }
+    return normV;
   }
   float sqrMag(){
     return (x*x)+(y*y);

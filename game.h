@@ -7,7 +7,7 @@ class Game{
   Game(const Game& other);
   virtual Game& operator =(const Game& other);
   void update(std::chrono::time_point<std::chrono::system_clock> current);
-  void follow_target(const struct game_object_t* target, struct game_object_t* follower);
+  void follow_target(float dt,const struct game_object_t* target, struct game_object_t* follower);
   void print();
   private:
   std::chrono::time_point<std::chrono::system_clock> prevTime;
@@ -15,8 +15,11 @@ class Game{
   float printT;
   game_object_t a;
   game_object_t b;
-  const float fps = 1.0/60.0f;
-  float printfps = 1.0;
+  float maxVel=100;
+  float maxAccel=10;
+  const float FPS = 1.0/60.0f;
+  const float PRINT_FPS = 1000.0f;
+  const float MILLI_TO_SEC = 1.0f/1000.0f;
 };
 
 
