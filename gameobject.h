@@ -28,19 +28,27 @@ struct vec2_t{
     return prod;
   }
   vec2_t norm(){
-    vec2_t normV = {};
-    if(sqrMag()>0.0f){ 
-      normV.x = (1.0f/sqrMag())*x;
-      normV.y = (1.0f/sqrMag())*y;
-    }
-    else{
-      normV.x = 0.0f;
-      normV.y = 0.0f;
-    }
+    vec2_t normV = {}; 
+    normV.x = fastInv(sqrMag())*x;
+    normV.y = fastInv(sqrMag())*y;
     return normV;
   }
   float sqrMag(){
     return (x*x)+(y*y);
+  }
+
+  //fast inverse squareroot from quake III
+  float fastInv(float number){
+    long i;
+    float x2,y;
+    const float threehalfs = 1.5f;
+    x2 = number*0.5f;
+    y=number;
+    i = *(long *)&y;
+    i = 0x5f3759df - (i>>1);
+    y = *(float *)&i;
+    y = y * (threehalfs - (x2 * y * y));
+    return y;
   }
 };
 
