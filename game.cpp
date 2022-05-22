@@ -1,7 +1,12 @@
 #include "game.h"
 #include<chrono>
 #include <string>
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
+#include <SFML/OpenGL.hpp>
 #include <bit>
+#include <math.h>
 #include "randomGen.h"
 using namespace std;
 Game::Game(){
@@ -9,10 +14,10 @@ Game::Game(){
   a ={};
   printT =0.0f;
   b = {};
-  a.position.x = randFloat().randRange(-25.0,25.0);
-  a.position.y = randFloat().randRange(-25.0,25.0);
-  b.position.x = randFloat().randRange(-25.0,25.0);
-  b.position.y = randFloat().randRange(-25.0,25.0);
+  a.position.x = randFloat().randRange(0.0f,width);
+  a.position.y = randFloat().randRange(0.0f,height);
+  b.position.x = randFloat().randRange(0.0f,width);
+  b.position.y = randFloat().randRange(0.0f,height);
   a.velocity.x=0.0f;
   a.velocity.y=0.0f;
   b.velocity.x=0.0f;
@@ -20,22 +25,72 @@ Game::Game(){
   a.accel.x=0.0f;
   b.accel.x=0.0f;
   b.accel.y=0.0f;
+  followerTexture.loadFromFile("assets/follower.png",sf::IntRect(0,0,16,16));
+  targetTexture.loadFromFile("assets/target.png",sf::IntRect(0,0,16,16));
+  
+  targetTexture.setSmooth(false);
+  followerTexture.setSmooth(false);
+  targetSprite.setTexture(targetTexture);
+  followerSprite.setTexture(followerTexture);
+  targetSprite.setOrigin(16,16);
+  followerSprite.setOrigin(16,16);
+  targetSprite.setPosition(sf::Vector2f(a.position.x,a.position.y));
+  followerSprite.setPosition(sf::Vector2f(b.position.x,b.position.y));
+  followerSprite.setScale(2.0f,2.0f);
+  targetSprite.setScale(2.0f,2.0f);
+
 }
-void Game::update(std::chrono::time_point<std::chrono::system_clock> current){
+void Game::update(std::chrono::time_point<std::chrono::system_clock> current,sf::RenderWindow* window){
   std::chrono::duration<float> elapsed = (current-prevTime);
   
   //cout<<t<<endl;
   t += elapsed.count();
   printT += elapsed.count();
-  if(t>=FPS){
-    follow_target(t,&a,&b);
   
+  if(t>=FPS){
+    vec2_t acc = {};
+    acc.x = accelx*t;
+    acc.y = accely*t;
+    accelx =0.0f;
+    accely =0.0f;
+    vec2_t desiredAccel = a.accel.addX(acc.muxX(accelspeed));
+    if(desiredAccel.sqrMag() > maxAccel*maxAccel){
+      desiredAccel = desiredAccel.norm().muxX(maxAccel);
+    }
+    a.accel = desiredAccel;
+    vec2_t desiredVelocity=a.velocity.addX(a.accel.muxX(t));
+    
+    if(desiredVelocity.sqrMag() > maxVel*maxVel){
+      desiredVelocity = desiredVelocity.norm().muxX(maxVel);
+    }
+    a.velocity = desiredVelocity;
+    
+    a.position = a.position.addX(a.velocity.muxX(t));
+    
+    a.position.x = min(width-32.0f,max(32.0f,a.position.x));
+
+    a.position.y = min(height-32.0f,max(32.0f,a.position.y));
+    if(a.position.y == height-32.0f|| a.position.y == 32.0f){
+      //a.accel.y=0;
+      a.velocity.y=0;
+    }
+
+    if(a.position.x == width-32.0f|| a.position.x == 32.0f){
+      //a.accel.x=0;
+      a.velocity.x=0;
+    }
+    
+    follow_target(t,&a,&b);
+    
+
+
+
     t-=FPS;
     vec2_t dist = a.position.addX(b.position.muxX(-1.0f));
     //std::cout<<"dist"<<dist.sqrMag()<<std::endl;
     if(dist.sqrMag()<(RADIUS)*(RADIUS)){
-      a.position.x = randFloat().randRange(-100.0f,100.0f);
-      a.position.y = randFloat().randRange(-100.0f,100.0f);
+      a.position.x = randFloat().randRange(0.0f,width);
+      a.position.y = randFloat().randRange(0.0f,height);
 
       b.velocity.x=0.0f;
       b.velocity.y=0.0f;
@@ -43,8 +98,31 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current){
       b.accel.x=0.0f;
       b.accel.y=0.0f;
     }
-
+    targetSprite.setPosition(sf::Vector2f(a.position.x,a.position.y));
+    followerSprite.setPosition(sf::Vector2f(b.position.x,b.position.y));
+    
+    
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    window->clear();
+    window->draw(targetSprite);
+    window->draw(followerSprite);
+    window->display();
   }
+  if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){
+    accely=-1.0f;
+  }
+  
+  if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){
+    accely=1.0f;
+  }
+  if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){
+    accelx=-1.0;
+  }
+  
+  if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){
+    accelx=1.0;
+  }
+
   if(printT >=PRINT_FPS){
     printT-=PRINT_FPS;
     print();
@@ -54,6 +132,7 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current){
   }
   prevTime= current;
 }
+
 Game::Game(const Game& other){
   prevTime = other.prevTime;
   a=other.a;
@@ -81,7 +160,7 @@ void Game::print(){
 void Game::follow_target(float dt,const struct game_object_t* target, struct game_object_t* follower){
   vec2_t accelVec = target->position.addX(follower->position.muxX(-1.0f));
   float maxTime = (dt>1.0f)?1.0f:dt;
-  vec2_t desiredAccel = follower->accel.addX(accelVec.norm().muxX(maxTime));
+  vec2_t desiredAccel = follower->accel.addX(accelVec.norm().muxX(maxTime*accelspeed));
   //print(); 
   //cout<<"dt:"<<dt<<endl; 
   if(desiredAccel.sqrMag() > maxAccel*maxAccel)
@@ -118,6 +197,20 @@ void Game::follow_target(float dt,const struct game_object_t* target, struct gam
       cumulativeDist += DIST_UNIT;
     }
     follower->position = currentPos.addX(normDisplace.muxX(cumulativeDist));
+
+    follower->position.x = min(width-32.0f,max(32.0f,follower->position.x));
+
+    follower->position.y = min(height-32.0f,max(32.0f,follower->position.y));
+
+    if(follower->position.y == height-32.0f|| follower->position.y == 32.0f){
+      //follower->accel.y=0;
+      follower->velocity.y=0;
+    }
+
+    if(follower->position.x == width-32.0f|| follower->position.x == 32.0f){
+      //follower->accel.x=0;
+      follower->velocity.x=0;
+    }
     if(follower->position.addX(target->position.muxX(-1.0)).sqrMag()<RADIUS*RADIUS){
       return;
     }

@@ -1,8 +1,19 @@
-LDFLAGS= -L/lib/ -l:libstdc++.a -static
-CFLAGS= -Wall -W -std=c++17 -pedantic
-all: mainloop.o game.o
+CXX=g++
+LDFLAGS=-g -Wall -Wextra -Wpedantic
+CPPFLAGS=-g -Wall -Wextra -Wpedantic
+LDLIBS=-lsfml-graphics -lsfml-window -lsfml-audio -lsfml-system -lGL
+RM=rm -f
 
-	g++ $(LDFLAGS) $(CFLAGS) -o prog mainloop.o game.o
+SRCS=game.cpp mainloop.cpp
+OBJS=$(subst .cpp,.o,$(SRCS))
+all: rungame
+
+rungame: $(OBJS)
+	$(CXX) $(LDFLAGS) -o rungame $(OBJS) $(LDLIBS)
+
 
 clean:
-	$(RM) prog
+	$(RM) $(OBJS)
+
+distclean:
+	$(RM) rungame
