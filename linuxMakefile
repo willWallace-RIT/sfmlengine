@@ -8,6 +8,11 @@ SRCS=game.cpp mainloop.cpp
 OBJS=$(subst .cpp,.o,$(SRCS))
 all: rungame
 
+game.o: game.cpp game.h
+	$(CXX) $(LDFLAGS) -c game.cpp -o game.o  $(LDLIBS)
+
+mainloop.o: mainloop.cpp
+	$(CXX) $(LDFLAGS) -c mainloop.cpp -o mainloop.o $(LDLIBS)
 rungame: $(OBJS)
 	$(CXX) $(LDFLAGS) -o rungame $(OBJS) $(LDLIBS)
 
