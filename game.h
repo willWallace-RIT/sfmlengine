@@ -44,7 +44,7 @@ class Game{
   float maxAccel=10;
   float totalTime=0.0;
   float accelMux =1.0f;
-  float accelAdd = 0.5f;
+  float accelAdd = 2.0f;
   const int muxTime = 10;
   int floorVal = 0;
   const float FPS = 1.0f/60.0f;

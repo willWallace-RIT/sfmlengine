@@ -101,9 +101,9 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current,sf:
     drawText(pS2Pfont,window,"Press Z for chase game",12,sf::Color::Red,200,500);
 
     drawText(pS2Pfont,window,"Press X for follower demo",12,sf::Color::Red,200,600);
-    
+
     drawText(pS2Pfont,window,"Press Q for Quit",12,sf::Color::Red,200,700);
-    
+
 
     drawText(pS2Pfont,window,"(In Game press Press M for menu)",12,sf::Color::Red,200,800);
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Z)){
@@ -120,7 +120,7 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current,sf:
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawText(pS2Pfont,window,"GAMEOVER",32,sf::Color::Red,300,100);
-    
+
 
     std::stringstream sstr;
     sstr<<std::fixed<<std::setprecision(2)<<totalTime; 
@@ -128,7 +128,7 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current,sf:
     drawText(pS2Pfont,window,"Press Z for chase game",12,sf::Color::Red,200,500);
 
     drawText(pS2Pfont,window,"Press X for follower demo",12,sf::Color::Red,200,600);
-      
+
     drawText(pS2Pfont,window,"Press Q for Quit",12,sf::Color::Red,200,700);
 
     drawText(pS2Pfont,window,"(In Game press Press M for menu)",12,sf::Color::Red,200,800);
@@ -148,10 +148,12 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current,sf:
     t += elapsed.count();
     printT += elapsed.count();
     totalTime+=elapsed.count();
-    if(((int)floorf(totalTime)!=floorVal)){
-      floorVal=(int)floorf(totalTime);
-      if(((int)floorf(totalTime))%muxTime==0){ 
-        accelMux += accelAdd;
+    if(gS == GameState::chaseGame){
+      if(((int)floorf(totalTime)!=floorVal)){
+        floorVal=(int)floorf(totalTime);
+        if(((int)floorf(totalTime))%muxTime==0){ 
+          accelMux += accelAdd;
+        }
       }
     }
 
