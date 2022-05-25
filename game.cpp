@@ -297,7 +297,7 @@ void Game::follow_target(float dt,const struct game_object_t* target, struct gam
   vec2_t desiredAccel = follower->accel.addX(accelVec.norm().muxX(maxTime*accelspeed));
   //print(); 
   //cout<<"dt:"<<dt<<endl; 
-  if(desiredAccel.sqrMag() > maxAccel*maxAccel)
+  if(desiredAccel.sqrMag() > (accelMux*maxAccel)*(accelMux*maxAccel))
     desiredAccel = desiredAccel.norm().muxX(accelMux*maxAccel);
   follower->accel=desiredAccel;
 
