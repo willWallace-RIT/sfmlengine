@@ -1,5 +1,4 @@
-CXX=x86_64-w64-mingw32-g++
-
+CXX=g++
 WCXX=x86_64-w64-mingw32-g++
 LDFLAGS=-g -Wall -Wextra -Wpedantic
 CPPFLAGS=-g -Wall -Wextra -Wpedantic 
@@ -12,18 +11,29 @@ RM=rm -f
 
 SRCS=game.cpp mainloop.cpp
 OBJS=$(subst .cpp,.o,$(SRCS))
-all: rungame
+all:linux
 
-game.o: game.cpp 
-	$(WCXX) $(LDFLAGS) $(WINC) -c game.cpp -o game.o  $(LDLIBS) $(LDWIN) $(WLIBS)
+wondows: EXX=$(WCXX)
+wondows: OUTP=wingame
+wondows: LDOPTS = $(LDLIBS) $(LDWIN) $(WLIBS)
+wondows: INC = $(WINC)
+
+linux: EXX=$(CXX)
+linux: INC=
+linux: LDOPTS = $(LDLIBS) $(LDWIN)
+linux: rungame
+game.o: game.cpp
+	
+
+	$(EXX) $(LDFLAGS) $(INC) -c game.cpp -o game.o  $(LDOPTS)
 
 mainloop.o: mainloop.cpp 
-	$(WCXX) $(LDFLAGS) $(WINC) -c mainloop.cpp -o mainloop.o  $(LDLIBS) $(LDWIN) $(WLIBS)
+	$(EXX) $(LDFLAGS) $(INC) -c mainloop.cpp -o mainloop.o  $(LDOPTS)
 wondows: $(OBJS)
-	$(WCXX) $(LDFLAGS) $(WINC) -o winGame $(OBJS)  $(LDLIBS) $(LDWIN) $(WLIBS)
+	$(EXX) $(LDFLAGS) $(INC) -o $(OUTP) $(OBJS)  $(LDOPTS)
 
 rungame: $(OBJS)
-	$(CXX) $(LDFLAGS)  -o rungame $(OBJS) $(LDLIBS) $(LDLINUX)
+	$(EXX) $(LDFLAGS)  -o rungame $(OBJS) $(LDLIBS) $(LDLINUX)
 
 
 clean:
