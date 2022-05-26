@@ -54,7 +54,7 @@ Game::Game(){
 
 
 }
-
+//reset() - resets game variables for the start of each game 
 void Game::reset(){
 
   prevTime = std::chrono::system_clock::now();  
@@ -81,6 +81,8 @@ void Game::reset(){
   targetSprite.setPosition(sf::Vector2f(a.position.x,a.position.y));
   followerSprite.setPosition(sf::Vector2f(b.position.x,b.position.y));
 }
+
+//drawText -- helper function for drawing text to the screen
 void Game::drawText(sf::Font* font,sf::RenderWindow* window,std::string text, int size,sf::Color color,float x, float y){
   sf::Text txt;
   txt.setFont(*font);
@@ -92,6 +94,9 @@ void Game::drawText(sf::Font* font,sf::RenderWindow* window,std::string text, in
   txt.setPosition(x,y);
   window->draw(txt);
 }
+
+//update -- update function called each iteration of the main loop with throttling for calculation
+//and updates to maintain consistency, (60FPS for my poor old laptop)
 void Game::update(std::chrono::time_point<std::chrono::system_clock> current,sf::RenderWindow* window){
   std::chrono::duration<float> elapsed = (current-prevTime);
   if(gS == GameState::mainMenu){
@@ -149,6 +154,7 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current,sf:
     printT += elapsed.count();
     totalTime+=elapsed.count();
     if(gS == GameState::chaseGame){
+      //keeps track of time increment for accelMax modifier on follower
       if(((int)floorf(totalTime)!=floorVal)){
         floorVal=(int)floorf(totalTime);
         if(((int)floorf(totalTime))%muxTime==0){ 
@@ -164,11 +170,13 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current,sf:
       acc.y = accely*t;
       accelx =0.0f;
       accely =0.0f;
+      //target acceleration calc
       vec2_t desiredAccel = a.accel.addX(acc.muxX(accelspeed));
       if(desiredAccel.sqrMag() > maxAccel*maxAccel){
         desiredAccel = desiredAccel.norm().muxX(maxAccel);
       }
       a.accel = desiredAccel;
+      //target velocity calc
       vec2_t desiredVelocity=a.velocity.addX(a.accel.muxX(t));
 
       if(desiredVelocity.sqrMag() > maxVel*maxVel){
@@ -176,8 +184,12 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current,sf:
       }
       a.velocity = desiredVelocity;
 
+      //target displacement
       a.position = a.position.addX(a.velocity.muxX(t));
 
+      //screen bounds calculation and stopping an enhancement to eventually would be the
+      //convervation of momentum during wall collision for more realism not too hard but was outside
+      //scope of time
       a.position.x = min(width-32.0f,max(32.0f,a.position.x));
 
       a.position.y = min(height-32.0f,max(32.0f,a.position.y));
@@ -185,18 +197,19 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current,sf:
         //a.accel.y=0;
         a.velocity.y=0;
       }
-
       if(a.position.x == width-32.0f|| a.position.x == 32.0f){
         //a.accel.x=0;
         a.velocity.x=0;
       }
 
+      // follow target calculation
       follow_target(t,&a,&b);
 
 
 
 
       t-=FPS;
+      //calculation for lose case in chaseGame
       vec2_t dist = a.position.addX(b.position.muxX(-1.0f));
       //std::cout<<"dist"<<dist.sqrMag()<<std::endl;
       if(gS == GameState::chaseGame){
@@ -212,6 +225,7 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current,sf:
           gS = GameState::gameOver;
         }
       }else{
+        //stops follower when it reaches a certain radius
         if(dist.sqrMag()<(FOLLOWRADIUS)*(FOLLOWRADIUS)){
 
           b.velocity.x=0.0f;
@@ -221,20 +235,24 @@ void Game::update(std::chrono::time_point<std::chrono::system_clock> current,sf:
           b.accel.y=0.0f;
         }
       }
-
+      //sets sprite position to match a,b vectors
       targetSprite.setPosition(sf::Vector2f(a.position.x,a.position.y));
       followerSprite.setPosition(sf::Vector2f(b.position.x,b.position.y));
 
-
+      //opengl screen clear
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      //timer output
       std::stringstream sstr;
       sstr<<std::fixed<<std::setprecision(2)<<totalTime; 
+      //drawcalls
       drawText(pS2Pfont,window,"time survived: "+sstr.str(),32,sf::Color::Red,100,100);
       //window->clear();
       window->draw(targetSprite);
       window->draw(followerSprite);
       window->display();
     }
+
+    //inputs
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){
       accely=-1.0f;
     }
@@ -280,7 +298,7 @@ Game& Game::operator=(const Game& other){
   t=other.t;
   return *this;
 }
-
+//prints a,b vector information
 void Game::print(){
   cout<<"a position:("<<a.position.x<<","<<a.position.y<<")"<<endl;
 
@@ -293,37 +311,37 @@ Game::~Game(){
   delete pS2Pfont;
 }
 
+//follow_target -- follows the target using acceleration as outlined in the spec, NOTE: There is
+//a key difference in the two play modes follower close matches spec using the max values mention
+//whereas the chase game adjusts the maxAccel value so outside of spec but add challenge and
+//possibly fun
 void Game::follow_target(float dt,const struct game_object_t* target, struct game_object_t* follower){
+  //accel direction change
   vec2_t accelVec = target->position.addX(follower->position.muxX(-1.0f));
   float maxTime = (dt>1.0f)?1.0f:dt;
+  //accel calc
   vec2_t desiredAccel = follower->accel.addX(accelVec.norm().muxX(maxTime*accelspeed));
-  //print(); 
-  //cout<<"dt:"<<dt<<endl; 
   if(desiredAccel.sqrMag() > (accelMux*maxAccel)*(accelMux*maxAccel))
     desiredAccel = desiredAccel.norm().muxX(accelMux*maxAccel);
   follower->accel=desiredAccel;
-
-  //cout<<"des accel.:("<<desiredAccel.x<<","<<desiredAccel.y<<")"<<endl;
+  //velocity calc
   vec2_t desiredVelocity = follower->velocity.addX(follower->accel.muxX(maxTime));
   if(desiredVelocity.sqrMag() > maxVel*maxVel){
     desiredVelocity = desiredVelocity.norm().muxX(maxVel);}
   follower->velocity = desiredVelocity;
+  //displacment
   vec2_t currentPos = follower->position.muxX(1.0);
   vec2_t desiredPosition = follower->position.addX(follower->velocity.muxX(maxTime));
   vec2_t displacement = desiredPosition.addX(follower->position.muxX(-1.0f));
   vec2_t normDisplace =  displacement.norm();
   float mag = displacement.mag();
-  //cout<<"mag:"<<mag<<endl;
+  //splits up displacement into unit pieces to avoid over shoot with a hight velocity
+  //time consuming but should avoid foreseeable collision problems
   float divIter = mag/DIST_UNIT;
   int numOfIterations = static_cast<int>(divIter);
   bool isInt = (divIter==static_cast<int>(divIter));
   numOfIterations+=(isInt)?0:1;
-  //cout<<"iter:"<<numOfIterations<<endl;
   float cumulativeDist = 0;
-  //cout<<"float"<<sizeof(float)<<endl; 
-  //cout<<"long"<<sizeof(long)<<endl;
-  //string b;
-  //cin>>b;
   for(int i = 0; i<numOfIterations;i++){
 
     if(!(isInt)&&i == numOfIterations-1){
@@ -339,21 +357,21 @@ void Game::follow_target(float dt,const struct game_object_t* target, struct gam
     follower->position.y = min(height-32.0f,max(32.0f,follower->position.y));
 
     if(follower->position.y == height-32.0f|| follower->position.y == 32.0f){
-      //follower->accel.y=0;
       follower->velocity.y=0;
     }
 
     if(follower->position.x == width-32.0f|| follower->position.x == 32.0f){
-      //follower->accel.x=0;
       follower->velocity.x=0;
     }
+
+
+    //return check for position so that if follower reaches target displacement calculation stops
     if(gS == GameState::chaseGame){
       if(follower->position.addX(target->position.muxX(-1.0)).sqrMag()<RADIUS*RADIUS){
         return;
       }
 
     }
-
     else if(gS == GameState::follower){
       if(follower->position.addX(target->position.muxX(-1.0)).sqrMag()<FOLLOWRADIUS*FOLLOWRADIUS){
         return;

@@ -13,6 +13,7 @@
 
 int main()
 {
+  //using fullscreen so I don't have to adjust units for now.
   sf::RenderWindow window(sf::VideoMode(1920,1080), "OpenGL", sf::Style::Fullscreen, sf::ContextSettings(32));
   window.setActive(true);
   sf::Event event;
@@ -29,9 +30,13 @@ int main()
 
       else if(event.type == sf::Event::Resized)
       {
+         //while resize is an option, an enhancement would be to convert width, height, gameobject
+         //position variables, physics to a modifiable units so it can match screen space, time consuming for now so just
+         //using fullscreen is the solution for now
          glViewport(0,0,event.size.width, event.size.height);
       }
-        
+      //Quit input placed outside of game state so I don't have to pass running bool pointer into
+      //game class or update function  
       if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q)){
         running = false;
       }
