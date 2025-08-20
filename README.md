@@ -1,5 +1,7 @@
 quick sfml engine I wrote up from a prompt question
 
+specifically look at management of movement at high speeds.
+
 
 Copyright 2022 Will Gardner
 
