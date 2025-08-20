@@ -1,6 +1,6 @@
-quick sfml engine I wrote up from a prompt question
+quick sfml engine and game demo I wrote up from a prompt question
 
-specifically look at management of movement at high speeds.
+specifically look at management of movement at high speeds under `Game::follow_target()` in `game.cpp`
 
 build intsructions (windows im not sure will work ootb about was using minGW on linux so the makefile might a little edit under cygwin:
 linux:
