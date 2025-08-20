@@ -2,12 +2,13 @@ quick sfml engine I wrote up from a prompt question
 
 specifically look at management of movement at high speeds.
 
-build intsructions:
+build intsructions (windows im not sure will work ootb about was using minGW on linux so the makefile might a little edit under cygwin:
 linux:
-makeWindows
+make
+Windows:
 make wondows
 
-Copyright <YEAR> <COPYRIGHT HOLDER>
+Copyright 2022 Will Gardner
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
