@@ -9,3 +9,5 @@ Windows:
 make wondows
 
 
+to fix build for mingw , change the wcxx variable to your specific compile command the makefile
+the ld flags should be ok
